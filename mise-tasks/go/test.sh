@@ -1,0 +1,3 @@
+#!/bin/sh
+#MISE description="Test with the race detector"
+go test -race -count=1 ./...

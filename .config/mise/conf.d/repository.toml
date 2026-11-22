@@ -1,0 +1,24 @@
+# Every component sits at ., so no folder is a config root, and mise's
+# monorepo mode stays off.
+# An empty config_roots would make mise 2026.11.11 warn of deprecated discovery.
+# mise merges the settings below with the root mise.toml.
+
+# The latest stable mise is the floor; CI pins the same version.
+min_version = "2026.11.12"
+
+[settings]
+# Every tool comes from the locks, whether a config file, a task or the command
+# line needs it. A tool with no entry fails instead of being looked up.
+locked = true
+# mise loads git:: task includes, and runs [deps] providers, only in
+# experimental mode.
+experimental = true
+lockfile = true
+# The platforms CI and contributors use, from the platforms answer. Without
+# it, mise install fills every tool up to the platforms any tool already
+# records, and rewrites the locks.
+lockfile_platforms = ["linux-x64", "macos-arm64"]
+
+# Every tool this root declares must match mise.lock or mise.<env>.lock.
+[tool_config]
+locked = true

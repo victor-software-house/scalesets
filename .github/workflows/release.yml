@@ -1,0 +1,37 @@
+name: Release
+
+# verctl's reusable release workflow, on every push to main and on demand.
+# It releases each version at HEAD whose release is incomplete.
+# A release is a tag and a GitHub Release, with no registry upload, since Go
+# fetches a module from its tag. Then the workflow opens or updates the
+# Version PR on verctl/release/main.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# One release run at a time. A newer run waits instead of cancelling one that
+# may be publishing. Each run releases every incomplete version at HEAD, so
+# the queued run covers what any skipped one would have. The "-caller" part
+# keeps this group apart from the called workflow's own group.
+concurrency:
+  group: ${{ github.workflow }}-caller-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  release:
+    permissions:
+      contents: write # tags, Releases, and verctl/release/main without the App
+      pull-requests: write # the Version PR without the App
+      id-token: write # every job of the reusable workflow requests it
+    uses: victor-software-house/verctl/.github/workflows/release.yml@7db72ad530b35bda6d7217606b1308f54168b710 # v0.8.6-rc.8
+    with:
+      mise-version: 2026.11.12
+      mise-env: ci
+    # The App token opens the Version PR so that its CI starts; a PR opened
+    # with GITHUB_TOKEN starts no workflow.
+    secrets:
+      app-client-id: ${{ secrets.CHANGESET_VERSION_APP_CLIENT_ID }}
+      app-private-key: ${{ secrets.CHANGESET_VERSION_APP_PRIVATE_KEY }}
