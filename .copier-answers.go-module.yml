@@ -1,0 +1,43 @@
+# Changes here will be overwritten by Copier; edit with `copier update --data`.
+_commit: v0.0.137
+_src_path: https://github.com/victor-software-house/templates.git
+build_os: linux
+ci_extra_tasks: []
+ci_runner: github-hosted
+ci_secrets: []
+default_branch: main
+generated_paths: []
+github_owner: victor-software-house
+go_version: 1.27.3
+layer: component
+linux_image: ubuntu-26.04
+merge_queue: false
+merge_queue_cancel_lower: true
+module_path: github.com/victor-software-house/scalesets
+pieces:
+- hooks
+- lint_markdown
+- lint_toml
+- lint_typos
+- lint_shell
+- lint_prose
+- openspec
+- ci
+- drift_check
+pieces_extra:
+- lint_workflows
+platforms:
+- linux-x64
+- macos-arm64
+project: go-module
+prose_fail_level: suggestion
+repository_visibility: public
+verify_timeout: 8
+workflow_policy:
+- drafts
+- concurrency
+- labels
+- permissions
+- pins
+- mise_env
+workflow_policy_namespaces: []

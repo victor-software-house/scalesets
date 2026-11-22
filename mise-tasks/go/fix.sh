@@ -1,0 +1,3 @@
+#!/bin/sh
+#MISE description="Fail when a go fix modernizer would change a file"
+go fix -diff ./...

@@ -1,0 +1,114 @@
+# golangci-lint v2, checked by `mise run go:lint`.
+# The task first verifies this file against the v2 schema, because `run`
+# ignores a key that the schema lacks, with no warning.
+version: "2"
+linters:
+  default: standard
+  enable:
+    # Closed sets: enum switches (exhaustive) and type switches over sealed
+    # interfaces marked //sumtype:decl (gochecksumtype) handle every case.
+    - exhaustive
+    - gochecksumtype
+    - asasalint
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - depguard
+    - durationcheck
+    - errchkjson
+    - errname
+    - errorlint
+    - fatcontext
+    - forbidigo
+    - gocheckcompilerdirectives
+    - gocritic
+    - gosec
+    - misspell
+    - modernize
+    - musttag
+    - nilerr
+    - nilnesserr
+    - nilnil
+    - noctx
+    - nolintlint
+    - perfsprint
+    - reassign
+    - revive
+    - sloglint
+    - thelper
+    - unconvert
+    - unparam
+    - usestdlibvars
+    - usetesting
+  settings:
+    depguard:
+      rules:
+        # No dependency without approval: code outside the tests imports only
+        # the standard library and this module. A test may import more, such
+        # as go-cmp. To approve a module, add it here in the pull request that
+        # adds it to go.mod.
+        deps:
+          list-mode: strict
+          files:
+            - $all
+            - "!$test"
+          allow:
+            - $gostd
+            - github.com/victor-software-house/scalesets$
+            - github.com/victor-software-house/scalesets/
+        json-v1:
+          # The trailing $ matches only v1, so encoding/json/v2 and
+          # encoding/json/jsontext stay allowed.
+          deny:
+            - pkg: encoding/json$
+              desc: use encoding/json/v2 and encoding/json/jsontext
+    errcheck:
+      check-type-assertions: true
+    exhaustive:
+      default-signifies-exhaustive: false
+    forbidigo:
+      # Only the composition root writes to the terminal or exits. The
+      # package match keeps a `*slog.Logger` named log allowed.
+      analyze-types: true
+      forbid:
+        - pattern: ^fmt\.Print.*$
+        - pattern: ^print(ln)?$
+        - pattern: ^log\.
+          pkg: ^log$
+        - pattern: ^os\.Exit$
+          pkg: ^os$
+    gochecksumtype:
+      default-signifies-exhaustive: false
+    govet:
+      enable-all: true
+      disable:
+        # Field order follows meaning instead of padding.
+        - fieldalignment
+        # Shadowing err in a nested scope is idiomatic.
+        - shadow
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+    sloglint:
+      kv-only: true
+      no-global: all
+    staticcheck:
+      checks:
+        - all
+    usetesting:
+      context-background: true
+      context-todo: true
+  exclusions:
+    rules:
+      # The composition root writes to the terminal and exits.
+      - path: ^cmd/
+        linters:
+          - forbidigo
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/victor-software-house/scalesets

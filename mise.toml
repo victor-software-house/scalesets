@@ -1,0 +1,30 @@
+# The toolchain and the checkers live here instead of in go.mod tool lines.
+# A tool line shares the module graph with the code and can force a replace.
+[tools]
+go = "1.27.3"
+"aqua:golangci/golangci-lint" = "2.15.0"
+"go:golang.org/x/vuln/cmd/govulncheck" = "1.10.0"
+# The ver task (release workflow, check:release) runs this verctl.
+"github:victor-software-house/verctl" = "0.8.6-rc.8"
+
+[env]
+# The pinned Go is the only Go: a newer go line in go.mod fails instead of
+# downloading another toolchain.
+GOTOOLCHAIN = "local"
+
+# mise-tasks/ contains this repository's task fragments and file tasks.
+# An includes list replaces the default task dirs, so mise-tasks comes first.
+# Add pinned git:: catalogs after it.
+[task_config]
+includes = [
+  # Pinned git:: catalogs follow mise-tasks.
+  "mise-tasks",
+  # template:check, template:off, and template:on, at actions main, 2026-11-22.
+  "git::https://github.com/victor-software-house/actions.git//tasks/template.toml?ref=1faaba6ff4a50ea1ecd26485acff0a58b9ad66ac",
+  # The ver task the release workflow runs; it pins the verctl above.
+  "git::https://github.com/victor-software-house/verctl.git//tasks/ver?ref=7db72ad530b35bda6d7217606b1308f54168b710",
+]
+
+[tasks."check:release"]
+description = "Validate the release fragments, pins and version files"
+run = "verctl check"

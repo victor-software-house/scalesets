@@ -1,0 +1,13 @@
+# go.mod keeps the module's version as a comment on its module line.
+# With no publisher, a release is a tag and a GitHub Release, since Go
+# fetches a module from its tag. The Swift package reads the same tag.
+packages:
+  - name: scalesets
+    path: go.mod
+
+# Maintainers and Apps a changelog never credits.
+changelog:
+  internal_authors:
+    - any-victor
+    - "github-actions[bot]"
+    - "vsh-changeset-version[bot]"
