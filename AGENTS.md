@@ -20,6 +20,7 @@
 ## Changes
 
 - The design and its decisions live in OpenSpec changes under `openspec/`, each with a proposal, a design, spec deltas and tasks.
+- `docs/research.md` surveys how other projects ship one core to several languages.
 - Nothing generated is committed: the C archive and the XCFramework are built by tasks and published as release assets.
 - One version covers the Go module and every binding, tagged `vX.Y.Z`.
   A pull request that changes behaviour adds a verctl fragment under `.changeset/`.

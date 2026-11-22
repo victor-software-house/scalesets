@@ -9,4 +9,4 @@ The program that uses it decides how many runners fit and starts each one on its
 The Go library sits at the root of this repository.
 Other languages call the same code through a C interface in `capi/`, and each binding lives in its own folder, starting with Swift in `swift/`.
 
-The design and its decisions live in OpenSpec changes under [`openspec/`](openspec/).
+The design is the OpenSpec change [`add-scalesets-library`](openspec/changes/add-scalesets-library/proposal.md).
