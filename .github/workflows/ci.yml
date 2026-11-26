@@ -85,66 +85,11 @@ jobs:
           # private repository, so its checkout takes the whole history.
           # The '0' is a string, so the || does not drop it.
           fetch-depth: ${{ github.event_name == 'merge_group' && '0' || '1' }}
-      - name: Detect changed paths
-        id: filter
-        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
-        with:
-          list-files: json
-          filters: |
-            all:
-              - '**'
-            docs:
-              - '*.md'
-              - 'docs/**'
-              - 'openspec/**'
-              - 'tasks.yaml'
-              - '.changeset/*.md'
       - name: Decide whether to build
         id: scope
-        shell: bash
-        env:
-          ALL: ${{ steps.filter.outputs.all_count }}
-          DOCS: ${{ steps.filter.outputs.docs_count }}
-          DOCS_FILES: ${{ steps.filter.outputs.docs_files }}
-        run: |
-          # A //go:embed line names files with no quotes, as a directory or a
-          # glob, relative to its own package, and a package embeds only files
-          # in its own directory or below. So a Go source with such a line, in
-          # the file's directory or a directory above it, may embed the file.
-          embeds() {
-            local dir=$1
-            while :; do
-              if git grep -qE '^[[:space:]]*//go:embed' -- ":(glob)${dir:+$dir/}*.go"; then
-                return 0
-              fi
-              if [ -z "$dir" ]; then
-                return 1
-              fi
-              case $dir in
-                */*) dir=${dir%/*} ;;
-                *) dir='' ;;
-              esac
-            done
-          }
-          build=false
-          if [ "$ALL" != "$DOCS" ]; then
-            build=true
-          else
-            while IFS= read -r file; do
-              # A source names the file by its path from the root, as a test
-              # run there does, or by a relative path that ends in it.
-              case $file in
-                */*) dir=${file%/*} ;;
-                *) dir='' ;;
-              esac
-              if git grep -qF -e "$file" -- '*.go' || embeds "$dir"; then
-                echo "A source reads $file, so the build reads it."
-                build=true
-                break
-              fi
-            done < <(jq -r '.[]' <<<"$DOCS_FILES")
-          fi
-          echo "build=$build" >>"$GITHUB_OUTPUT"
+        uses: victor-software-house/actions/build-scope@e9cf7ef0da4f4a9a7a6f978f5dd54be0d0d539bc # main, 2026-11-26
+        with:
+          go: true
 
   go-module-root:
     name: Build and test (go-module at .)
@@ -176,7 +121,7 @@ jobs:
           persist-credentials: false
       - name: Install locked tools
         timeout-minutes: 5
-        uses: victor-software-house/actions/mise@1faaba6ff4a50ea1ecd26485acff0a58b9ad66ac # main, 2026-11-22
+        uses: victor-software-house/actions/mise@e9cf7ef0da4f4a9a7a6f978f5dd54be0d0d539bc # main, 2026-11-26
         with:
           mirror-url: ${{ secrets.RELEASE_MIRROR_URL }}
           mirror-key: ${{ secrets.RELEASE_MIRROR_CI_KEY }}
@@ -269,7 +214,7 @@ jobs:
       # mise installs each task's tools as the task runs.
       - name: Install mise
         timeout-minutes: 5
-        uses: victor-software-house/actions/mise@1faaba6ff4a50ea1ecd26485acff0a58b9ad66ac # main, 2026-11-22
+        uses: victor-software-house/actions/mise@e9cf7ef0da4f4a9a7a6f978f5dd54be0d0d539bc # main, 2026-11-26
         with:
           mirror-url: ${{ secrets.RELEASE_MIRROR_URL }}
           mirror-key: ${{ secrets.RELEASE_MIRROR_CI_KEY }}
@@ -300,17 +245,9 @@ jobs:
       actions: write
     steps:
       - name: Delete the superseded entries
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          for prefix in go-root-Linux-; do
-            gh cache list --repo "$GITHUB_REPOSITORY" --ref "$GITHUB_REF" --key "$prefix" \
-              --limit 100 --json id,createdAt --jq 'sort_by(.createdAt) | reverse | .[1:][].id' |
-              while IFS= read -r id; do
-                gh cache delete "$id" --repo "$GITHUB_REPOSITORY"
-              done
-          done
+        uses: victor-software-house/actions/prune-caches@e9cf7ef0da4f4a9a7a6f978f5dd54be0d0d539bc # main, 2026-11-26
+        with:
+          prefixes: go-root-Linux-
 
   # The one check a ruleset requires: it reports on every pull request and
   # merge queue run. It fails when a build or the repository checks failed or
@@ -326,7 +263,7 @@ jobs:
     permissions:
       actions: read
     steps:
-      - uses: victor-software-house/actions/verify-jobs@1faaba6ff4a50ea1ecd26485acff0a58b9ad66ac # main, 2026-11-22
+      - uses: victor-software-house/actions/verify-jobs@e9cf7ef0da4f4a9a7a6f978f5dd54be0d0d539bc # main, 2026-11-26
         with:
           needs: ${{ toJSON(needs) }}
           jobs: "go-module-root checks"
